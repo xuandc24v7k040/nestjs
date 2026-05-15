@@ -6,8 +6,10 @@ import {
   getPaginationOptions,
   type MongoSortOrder,
 } from '../../common/utils/pagination.util';
-import type { UserDocument } from '../../database/schemas/users/user.schema';
-import { CreateUserDto } from './dto/create-user.dto';
+import type {
+  User,
+  UserDocument,
+} from '../../database/schemas/users/user.schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersQueryDto, UsersSortField } from './dto/users-query.dto';
 import { UsersRepository } from './users.repository';
@@ -16,8 +18,30 @@ import { UsersRepository } from './users.repository';
 export class UsersService {
   constructor(private readonly usersRepository: UsersRepository) {}
 
-  create(createUserDto: CreateUserDto) {
+  create(createUserDto: Partial<User>) {
     return this.usersRepository.create(createUserDto);
+  }
+
+  findByEmail(email: string, includeSecrets = false) {
+    return this.usersRepository.findByEmail(email, includeSecrets);
+  }
+
+  async updateAuthFields(
+    id: string,
+    update: Partial<
+      Pick<
+        User,
+        | 'refreshTokenHash'
+        | 'failedLoginAttempts'
+        | 'lockUntil'
+        | 'provider'
+        | 'googleId'
+        | 'passwordHash'
+        | 'fullName'
+      >
+    >,
+  ) {
+    return this.usersRepository.findOneAndUpdate({ _id: id }, update);
   }
 
   async findAll(query: UsersQueryDto) {

@@ -8,6 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import compression from 'compression';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { createValidationExceptionResponse } from '../common/utils';
 import { AllExceptionsFilter } from './filters';
@@ -21,8 +22,10 @@ export function setupApplication(app: INestApplication): void {
 
   app.use(helmet());
   app.use(compression());
+  app.use(cookieParser(configService.get<string>('COOKIE_SECRET')));
   app.enableCors({
     origin: parseCorsOrigin(corsOrigin),
+    credentials: true,
   });
 
   app.enableVersioning({
